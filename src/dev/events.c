@@ -1,4 +1,5 @@
 #include <SDL/SDL.h>
+#include <ctype.h>
 #include <pthread.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -60,7 +61,17 @@ void detect_stdin() {
     int ret = read(0, buf, n);
     assert(ret == n);
 
-    notify_event(EVENT_STDIN_DATA, buf, n);
+#if CONFIG_ENABLE_CTRL_C_Z
+    for (int i = 0; i < ret; i++) {
+      if (buf[i] == '\x01') {
+        printf("Ctrl-A exit the nemu\n");
+        nemu_exit();
+      } else if (!isprint(buf[i]))
+        break;
+    }
+#endif
+
+    notify_event(EVENT_STDIN_DATA, buf, ret);
 
     free(buf);
   }
@@ -85,7 +96,7 @@ void device_update(int signum) {
 #endif
 }
 
-#if 0
+#if CONFIG_ENABLE_CTRL_C_Z
 static void ctrl_code_handler(int no) {
   if (no == SIGINT) {
     /* https://en.wikipedia.org/wiki/Control-C */
@@ -145,7 +156,7 @@ void init_events() {
   init_timer();
 #endif
 
-#if 0
+#if CONFIG_ENABLE_CTRL_C_Z
   signal(SIGINT, ctrl_code_handler);
   signal(SIGTSTP, ctrl_code_handler);
 #endif

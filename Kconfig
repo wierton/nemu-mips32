@@ -228,6 +228,10 @@ config XLNX_ULITE_BASE
   depends on XLNX_ULITE=y
   default 0x1fe50000
 
+config ENABLE_CTRL_C_Z
+  bool "enable ctrl-c and ctrl-z in serial"
+  depends on XLNX_ULITE=y
+
 menuconfig XLNX_SPI
   bool "Xilinx spi device"
 
@@ -249,6 +253,5 @@ config XLNX_ELITE_BASE
   range 0x00000000 0x20000000
   depends on XLNX_ELITE=y
   default 0x1ff00000
-
 
 endmenu
